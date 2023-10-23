@@ -1,57 +1,96 @@
-import React from 'react';
-import logo from './logo.svg';
-import { Counter } from './features/counter/Counter';
-import './App.css';
+import React, { useEffect } from "react";
+import Home from "./Pages/Home";
+import LoginPage from "./Pages/LoginPage";
+import SignUpPage from "./Pages/SignUpPage";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Route,
+  Link,
+} from "react-router-dom";
+import CartPage from "./Pages/CartPage";
+import CheckoutPage from "./Pages/CheckoutPage";
+import ProductDetailPage from "./Pages/ProductDetailPage";
+import Protector from "./features/Auth/Component/Protector";
+import { useDispatch, useSelector } from "react-redux";
+import { getCartRequestByuser } from "./features/Cart/CartAction";
+import PageNotFound from "./app/PageNotFound";
+import OrderSuccess from "./Pages/OrderSuccess";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: (
+      <Protector>
+        <Home />
+      </Protector>
+    ),
+  },
+  {
+    path: "/login",
+    element: <LoginPage />,
+  },
+  {
+    path: "/register",
+    element: <SignUpPage />,
+  },
+  {
+    path: "/cart",
+    element: (
+      <Protector>
+        <CartPage />
+      </Protector>
+    ),
+  },
+  {
+    path: "/checkout",
+    element: (
+      <Protector>
+        <CheckoutPage />
+      </Protector>
+    ),
+  },
+  {
+    path: "/product/overview/:id",
+    element: (
+      <Protector>
+        <ProductDetailPage />
+      </Protector>
+    ),
+  },
+  {
+    path: "/order/success/:id",
+    element: (
+      <OrderSuccess/>
+    ),
+  },
+  {
+    path: "*",
+    element: (
+      <PageNotFound/>
+    ),
+  },
+]);
 
 function App() {
+  const currentUser = useSelector((state) => state.userAuth.users);
+  const products = useSelector(state=>state.cart.cart)
+  const cartChanges = useSelector(state=>state.cart.isRequest)
+  
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (currentUser) {
+      const uid = `?user=${currentUser.id}`;
+      dispatch(getCartRequestByuser(uid));
+    }
+    console.log(products,"pppppppppppppppppppppppppppppppppppppppppppppppppppp");
+  }, [dispatch]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <span>
-          <span>Learn </span>
-          <a
-            className="App-link"
-            href="https://reactjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux-toolkit.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux Toolkit
-          </a>
-          ,<span> and </span>
-          <a
-            className="App-link"
-            href="https://react-redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React Redux
-          </a>
-        </span>
-      </header>
-    </div>
+    <>
+      <RouterProvider router={router} />
+    </>
   );
 }
 
